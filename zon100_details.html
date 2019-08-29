@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=GBK">
+        <link rel="stylesheet" href="/jquery/sqd/css/style.css" type="text/css" media="screen, projection"/>
+        <link type="text/css" href="/jquery/ui/themes/redmond/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+        <style type="text/css" title="currentStyle">
+            @import "/jquery/DataTables/css/demo_page.css";
+            @import "/jquery/DataTables/css/demo_table.css";
+            @import "/jquery/context/css/vscontext.css";
+            div.table_Wrapper { border:10px solid blue; }
+        </style>
+        <style type="text/css">
+            /*demo page css*/
+            body{ font: 73% "宋体", sans-serif; margin: 5px;}
+            #exportexcel,#reset { padding: .2em;text-decoration: none;position: relative;}
+        </style>
+
+        <script type="text/javascript" src="/jquery/lib/jquery-1.4.2.js"></script>
+        <script type="text/javascript" src="/jquery/ui/ui/i18n/jquery.ui.datepicker-zh-CN.js"></script>
+        <script type="text/javascript" src="/jquery/ui/js/jquery-ui-custom.js"></script>
+        <script type="text/javascript" src="/jquery/DataTables/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="/jquery/DataTables/FixedHeader.min.js"></script>
+        <script type="text/javascript" src="/jquery/context/vscontext.jquery.js"></script>
+        <script type="text/javascript" src="/jquery/jquery.blockUI.js"></script>
+        <script type="text/javascript" src="/jquery/jquery.form.js"></script>
+        <script type="text/javascript" src="/jquery/mycommon.js"></script>
+        <script type="text/javascript" src="/jquery/ajaxdownloadcommon.js"></script>
+        <script type="text/javascript">
+            var fgs="C"
+            var asInitVals = new Array();
+
+            $(function() {
+                var wheight=window.screen.height
+                var oTable =$('#example').dataTable( {
+                    "bSort": false,
+                    "bInfo": false,
+                    "bPaginate": false,
+                    "bFilter": false,
+                    "oLanguage": {
+                        "sSearch": "搜索：",
+                        "sEmptyTable":"未查询到任何数据",
+                        "sZeroRecords":"无匹配的记录"
+                    },
+                    "fnFooterCallback": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
+
+			var totdhjs = 0;
+			var totdhsl = 0
+                        var totzpsl=0
+                        var totsssl=0
+                        var tothsjjje=0
+			//for ( var i=0 ; i<aaData.length ; i++ ){
+                        for ( var i=iStart ; i<iEnd ; i++ ){
+                            if (fgs=="C"  || fgs=="G"|| fgs=="Q"){
+                                totdhsl+=aaData[aiDisplay[i]][8]*1
+                                totzpsl+=aaData[aiDisplay[i]][9]*1
+                                totsssl+=aaData[aiDisplay[i]][10]*1
+                                tothsjjje+=aaData[aiDisplay[i]][12]*1
+                            }
+                            if ( fgs=="M"){
+								totdhjs+=aaData[aiDisplay[i]][6]*1
+                                totdhsl+=aaData[aiDisplay[i]][7]*1
+                                totsssl+=aaData[aiDisplay[i]][8]*1
+                                tothsjjje+=aaData[aiDisplay[i]][10]*1
+                            }
+                            if (fgs=="J"){
+                                totdhsl+=aaData[aiDisplay[i]][4]*1
+                                totsssl+=aaData[aiDisplay[i]][5]*1
+                                tothsjjje+=aaData[aiDisplay[i]][7]*1
+                            }
+
+			}
+
+
+			var nCells = nRow.getElementsByTagName('th');
+                        if (fgs=="C"  || fgs=="G"||fgs=="Q"){
+                            nCells[8].innerHTML = totdhsl.toFixed(1);
+                            nCells[9].innerHTML = totzpsl.toFixed(1);
+                            nCells[10].innerHTML = totsssl.toFixed(1);
+                            nCells[12].innerHTML = tothsjjje.toFixed(1);
+                        }
+                        if ( fgs=="M" ){
+							nCells[6].innerHTML = totdhjs.toFixed(1);
+                            nCells[7].innerHTML = totdhsl.toFixed(1);
+                            nCells[8].innerHTML = totsssl.toFixed(1);
+                            nCells[10].innerHTML = tothsjjje.toFixed(2);
+                        }
+                        if (fgs=="J"){
+                            nCells[4].innerHTML = totdhsl.toFixed(1);
+                            nCells[5].innerHTML = totsssl.toFixed(1);
+                            nCells[7].innerHTML = tothsjjje.toFixed(2);
+                        }
+
+                    },
+
+                    "bJQueryUI": true,
+                    "bSortClasses": false
+
+                } );
+                //new FixedHeader( oTable );
+                //$('#demo').vscontext({menuBlock: 'vs-context-menu'});
+                $('#exportexcel').button();
+                $('#exportexcel').click(function(){
+                    $('#exporttype').attr("value", "pdf")
+                })
+                $('#exportdetail').button();
+                $('#exportdetail').click(function(){
+                    $('#exporttype').attr("value", "excel")
+                })
+
+                $('#cancel').button();
+            });
+            function download(){
+                $("#myform").submit()
+            }
+
+
+        </script>
+        <title>订单明细 订单号：190300302077263</title>
+    </head>
+    <body class="ex_highlight">
+        <div id="wrap"  >
+            <div id="page-wrap"   >
+                <div id="title" ><img SRC="/images/mark.jpg"  /></div>
+            </div>
+        </div>
+        <div align="center">
+            订单明细<br/>
+            订单号：190300302077263
+        </div>
+        <div id="blockUIDiv" style="display:none">
+            <h2>文件生成完毕</h2>
+            <br/>
+            <a id="expdownload" target="_blank" href="#">下载</a>&nbsp;<input id="expclose" type="button" value="关闭"/>
+        </div>
+        <form id="myform" action="/djcx/ExportDdDetailAction.do" method="post" target="_blank">
+            <div align="left">
+
+                <input type="hidden" name="fgs" value="C"/>
+                <input type="hidden" name="seqno" value="190300302077263"/>
+                <input id='exporttype' type="hidden" name="exporttype" value="pdf"/>
+                订单纸张高度
+                <select name="pageheight">
+                    <option value="842" selected="true" >A4纸高度</option>
+                    <option value="793">280MM</option>
+                    <option value="396">140MM</option>
+                </select>
+                <input type="submit" id="exportexcel" value="下载打印订单"/>
+                <input type="submit" id="exportdetail" value="下载订单明细"/>
+            </div>
+        </form>
+
+        <div id="demo">
+            <table  cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+
+
+                <thead>
+                    <tr>
+                        <th rowspan="2" >行号</th>
+                        <th rowspan="2">商品编码</th>
+                        <th rowspan="2">商品条码</th>
+                        <th rowspan="2">品名</th>
+                        <th rowspan="2">品牌</th>
+                        <th rowspan="2">单位</th>
+                        <th class="ui-state-default" colspan="3">订货数量</th>
+                        <th rowspan="2">赠品数量</th>
+                        <th rowspan="2">实收数量</th>
+                        <th rowspan="2">含税进价</th>
+                        <th rowspan="2">含税进价金额</th>
+                        <th rowspan="2">备注</th>
+                    </tr>
+                    <tr>
+                        <th >件数</th>
+                        <th >件含量</th>
+                        <th >细数</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>总计：</th>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th>&nbsp;</th>
+                        <th align="right"></th>
+                        <th align="right"></th>
+                        <th align="right"></th>
+                        <th align="right"></th>
+                        <th align="right"></th>
+                        <th align="right"></th>
+                        <th align="right"></th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+
+                    <tr>
+                        <td>1</td>
+                        <td >185169</td>
+                        <td>6924187828544</td>
+                        <td  >洽洽香瓜子308g</td>
+                        <td >洽洽</td>
+                        <td >袋  </td>
+                        <td align="right">1.0</td>
+                        <td align="right">18.0</td>
+                        <td align="right">18.0</td>
+                        <td align="right">0.0</td>
+                        <td align="right">0.0</td>
+                        <td align="right">10.44</td>
+                        <td align="right">187.92</td>
+                        <td ></td>
+                    </tr>
+
+                </tbody>
+
+
+            </table>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,1488 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=GBK">
+        <link type="text/css" href="/jquery/ui/themes/redmond/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+        <style type="text/css" title="currentStyle">
+            @import "/jquery/DataTables/css/demo_page.css";
+            @import "/jquery/DataTables/css/demo_table.css";
+            @import "/jquery/context/css/vscontext.css";
+            div.table_Wrapper { border:10px solid blue; }
+        </style>
+        <style type="text/css">
+            /*demo page css*/
+            body{ font: 73% "宋体", sans-serif; margin: 5px;}
+            #exportexcel,#reset { padding: .2em;text-decoration: none;position: relative;}
+        </style>
+
+        <script type="text/javascript" src="/jquery/lib/jquery-1.4.2.js"></script>
+        <script type="text/javascript" src="/jquery/ui/ui/i18n/jquery.ui.datepicker-zh-CN.js"></script>
+        <script type="text/javascript" src="/jquery/ui/js/jquery-ui-custom.js"></script>
+        <script type="text/javascript" src="/jquery/DataTables/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="/jquery/DataTables/FixedHeader.min.js"></script>
+        <script type="text/javascript" src="/jquery/context/vscontext.jquery.js"></script>
+        <script type="text/javascript" src="/jquery/jquery.blockUI.js"></script>
+        <script type="text/javascript" src="/jquery/jquery.form.js"></script>
+        <script type="text/javascript" src="/jquery/ajaxdownloadcommon.js"></script>
+        <script type="text/javascript">            
+            var fgs="C"
+            var asInitVals = new Array();
+           
+            $(function() {
+                var wheight=window.screen.height
+                var oTable =$('#example').dataTable( {
+                    "bSort": true,
+                    "bInfo": false,
+                    "bPaginate": false,
+                    "bFilter": true,
+                    "oLanguage": {
+                        "sSearch": "搜索：",
+                        "sEmptyTable":"未查询到任何数据",
+                        "sZeroRecords":"无匹配的记录"
+                        
+                    },
+                    "fnFooterCallback": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
+			var nCells = nRow.getElementsByTagName('th');                        
+                        nCells[1].innerHTML = iEnd-iStart;
+                    },
+
+                    "bJQueryUI": true,
+                    "bSortClasses": false,
+                    "bAutoWidth":false
+                } );                
+                $('#exportexcel').button();
+                /*
+                $('#exportexcel').click(function(){
+                    var seqnosz=$(':checkbox[checked=true]')
+                    if (seqnosz.length==0){
+                        alert("请选择要下载的订单")
+                        return false
+                    }else
+                        return true
+                    
+                })*/
+                new FixedHeader( oTable );
+                $('#demo').vscontext({menuBlock: 'vs-context-menu'});
+                $('#cancel').button();
+                
+                $('#exportexcel').button();                
+            });
+            function selectall(){
+                var ckb=$(":checkbox");
+                ckb.attr("checked","checked");
+            }
+            function diselectall(){
+                var ckb=$(":checkbox");
+                ckb.attr("checked","");
+            }
+            function reverseall(){
+                var ckb=$(":checkbox").size()
+                for (i=0;i<ckb;i++){
+                    $(":checkbox")[i].checked=!$(":checkbox")[i].checked
+                }
+            }
+            function download(){
+                var seqnosz=$(':checkbox[checked=true]')
+                if (seqnosz.length==0){
+                    alert("请选择要下载的订单")                        
+                }else
+                    $("#myform").submit()
+           
+            }
+            
+         
+        </script>
+    </head>
+    <body class="ex_highlight">
+        <div id="blockUIDiv" style="display:none">
+            <h2>文件生成完毕</h2>
+            <br/>
+            <a id="expdownload" target="_blank" href="#">下载</a>&nbsp;<input id="expclose" type="button" value="关闭"/>
+        </div> 
+        <form id="myform" action="/djcx/ExportDdDetailAction.do" method="post" target="_blank">
+            <div align="left">            
+                <input type="hidden" name="fgs" value="C"/>
+                <input type="hidden" name="gysh" value="10492"/>
+                订单纸张高度
+                <select name="pageheight">
+                    <option value="842" selected="true" >A4纸高度</option>
+                    <option value="793">280MM</option>
+                    <option value="396">140MM</option>
+                </select>
+                <input type="submit" id="exportexcel" value="批量下载打印订单" onclick= "return checkEmpty()"/>                
+            </div>
+            <div class="vs-context-menu" style=" position:  absolute; z-index: 10" >
+                <ul>
+                    
+                    <li><a href="javascript:selectall()">全选</a> </li>
+                    <li><a href="javascript:diselectall()">取消</a> </li>
+                    <li><a href="javascript:reverseall()">反选</a> </li>
+                </ul>
+            </div>    
+            <div id="demo">
+                <table  cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+
+                    
+                    <thead>
+                        <tr>
+                            <th>选择</th>
+                            <th>操作</th>
+                            <th>订单编号</th>
+                            <th>订单类别</th>
+                            <th>预计到货日期</th>
+                            <th>截止日期</th> 
+                            <th>经营方式</th>
+                            <th>收货卖场</th>  
+                            <th>库区</th>  
+                            <th>代送卖场</th>   
+                            <th>收货状态</th>
+                        </tr>
+                    </thead>            
+                    <tfoot>
+                        <tr>
+                            <th>总计：</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>                     
+                            <th></th>
+                            <th></th> 
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th> 
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156177" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156177&fgs=C" target="_blank">190300301156177</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000011 通过库—61库单</td>        
+                            <td >114201随州清河路店  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155789" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155789&fgs=C" target="_blank">190300301155789</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000011 通过库—61库单</td>        
+                            <td >114201随州清河路店  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155684" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155684&fgs=C" target="_blank">190300301155684</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >101701新洲购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155499" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155499&fgs=C" target="_blank">190300301155499</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >101701新洲购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155509" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155509&fgs=C" target="_blank">190300301155509</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >101701新洲购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155547" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155547&fgs=C" target="_blank">190300301155547</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >116201安陆紫金路店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156714" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156714&fgs=C" target="_blank">190300301156714</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >120501阳逻瀚华天地店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156317" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156317&fgs=C" target="_blank">190300301156317</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >120501阳逻瀚华天地店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301157360" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301157360&fgs=C" target="_blank">190300301157360</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >103301应城购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156696" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156696&fgs=C" target="_blank">190300301156696</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >107001崇阳购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156310" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156310&fgs=C" target="_blank">190300301156310</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >107001崇阳购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301157561" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301157561&fgs=C" target="_blank">190300301157561</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >105301赤壁购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301157378" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301157378&fgs=C" target="_blank">190300301157378</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >105301赤壁购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155597" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155597&fgs=C" target="_blank">190300301155597</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000015 通过库—63库单</td>        
+                            <td >110501孝昌店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155490" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155490&fgs=C" target="_blank">190300301155490</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000015 通过库—63库单</td>        
+                            <td >110501孝昌店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301157365" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301157365&fgs=C" target="_blank">190300301157365</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000015 通过库—63库单</td>        
+                            <td >114401蔡甸金家店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155491" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155491&fgs=C" target="_blank">190300301155491</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000015 通过库—63库单</td>        
+                            <td >110501孝昌店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156285" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156285&fgs=C" target="_blank">190300301156285</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-19</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000015 通过库—63库单</td>        
+                            <td >103701蔡甸购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155533" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155533&fgs=C" target="_blank">190300301155533</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >106101麻城购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156349" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156349&fgs=C" target="_blank">190300301156349</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >102901红安购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156830" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156830&fgs=C" target="_blank">190300301156830</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >102901红安购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155813" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155813&fgs=C" target="_blank">190300301155813</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000012 通过库—61库双</td>        
+                            <td >111601荆门店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301158533" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301158533&fgs=C" target="_blank">190300301158533</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000012 通过库—61库双</td>        
+                            <td >107201沙洋购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155126" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155126&fgs=C" target="_blank">190300301155126</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000012 通过库—61库双</td>        
+                            <td >102401京山联合广场店  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301158564" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301158564&fgs=C" target="_blank">190300301158564</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000012 通过库—61库双</td>        
+                            <td >107201沙洋购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156125" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156125&fgs=C" target="_blank">190300301156125</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000012 通过库—61库双</td>        
+                            <td >111601荆门店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301158609" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301158609&fgs=C" target="_blank">190300301158609</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000012 通过库—61库双</td>        
+                            <td >107201沙洋购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156299" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156299&fgs=C" target="_blank">190300301156299</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >113701大悟店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156515" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156515&fgs=C" target="_blank">190300301156515</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >113701大悟店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156247" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156247&fgs=C" target="_blank">190300301156247</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >113701大悟店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156665" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156665&fgs=C" target="_blank">190300301156665</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >113701大悟店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155967" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155967&fgs=C" target="_blank">190300301155967</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118201钟祥中百广场店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155863" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155863&fgs=C" target="_blank">190300301155863</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118201钟祥中百广场店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155806" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155806&fgs=C" target="_blank">190300301155806</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118201钟祥中百广场店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155911" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155911&fgs=C" target="_blank">190300301155911</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118201钟祥中百广场店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155844" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155844&fgs=C" target="_blank">190300301155844</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118201钟祥中百广场店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301157379" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301157379&fgs=C" target="_blank">190300301157379</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >105301赤壁购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301157562" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301157562&fgs=C" target="_blank">190300301157562</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >105301赤壁购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301158678" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301158678&fgs=C" target="_blank">190300301158678</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-21</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >102601孝感购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155800" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155800&fgs=C" target="_blank">190300301155800</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-21</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >102601孝感购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156044" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156044&fgs=C" target="_blank">190300301156044</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-21</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >102601孝感购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156081" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156081&fgs=C" target="_blank">190300301156081</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-21</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >102601孝感购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156171" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156171&fgs=C" target="_blank">190300301156171</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >103401潜江购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156865" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156865&fgs=C" target="_blank">190300301156865</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >105001孝感城站路购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156363" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156363&fgs=C" target="_blank">190300301156363</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >105001孝感城站路购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156230" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156230&fgs=C" target="_blank">190300301156230</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >105001孝感城站路购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156259" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156259&fgs=C" target="_blank">190300301156259</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >106701嘉鱼购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155073" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155073&fgs=C" target="_blank">190300301155073</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >108201嘉鱼潘家湾店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156323" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156323&fgs=C" target="_blank">190300301156323</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >106701嘉鱼购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156524" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156524&fgs=C" target="_blank">190300301156524</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >106701嘉鱼购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156740" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156740&fgs=C" target="_blank">190300301156740</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >106701嘉鱼购物广场  </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156655" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156655&fgs=C" target="_blank">190300301156655</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >110801云梦店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156294" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156294&fgs=C" target="_blank">190300301156294</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >110801云梦店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156720" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156720&fgs=C" target="_blank">190300301156720</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >110801云梦店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156718" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156718&fgs=C" target="_blank">190300301156718</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >110801云梦店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156319" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156319&fgs=C" target="_blank">190300301156319</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >110801云梦店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156318" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156318&fgs=C" target="_blank">190300301156318</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >110801云梦店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155797" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155797&fgs=C" target="_blank">190300301155797</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118301京山翰林华府店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155925" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155925&fgs=C" target="_blank">190300301155925</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118301京山翰林华府店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301155782" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301155782&fgs=C" target="_blank">190300301155782</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118301京山翰林华府店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156198" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156198&fgs=C" target="_blank">190300301156198</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118301京山翰林华府店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156159" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156159&fgs=C" target="_blank">190300301156159</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000016 通过库—63库双</td>        
+                            <td >118301京山翰林华府店 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156253" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156253&fgs=C" target="_blank">190300301156253</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >108801黄冈购物广场 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156866" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156866&fgs=C" target="_blank">190300301156866</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >108801黄冈购物广场 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300301156509" /></td>
+                            <td id="isdy" >已下载</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300301156509&fgs=C" target="_blank">190300301156509</a></td>
+                            <td  >仓库采购订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-25</td>                                                                   
+                            <td >经销</td>                    
+                            <td >0005通过库-汉鹏物流</td>     
+                            <td >000014 通过库—62库双</td>        
+                            <td >108801黄冈购物广场 </td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302079919" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302079919&fgs=C" target="_blank">190300302079919</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >100101唐家墩购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302079959" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302079959&fgs=C" target="_blank">190300302079959</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >100101唐家墩购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302076622" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302076622&fgs=C" target="_blank">190300302076622</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >100201汉阳人信汇店  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302076472" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302076472&fgs=C" target="_blank">190300302076472</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >100201汉阳人信汇店  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302076835" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302076835&fgs=C" target="_blank">190300302076835</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >100401古田路购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077902" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077902&fgs=C" target="_blank">190300302077902</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >104001沌口金凯购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302078103" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302078103&fgs=C" target="_blank">190300302078103</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >104001沌口金凯购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077885" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077885&fgs=C" target="_blank">190300302077885</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >104001沌口金凯购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302078339" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302078339&fgs=C" target="_blank">190300302078339</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >104001沌口金凯购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302079465" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302079465&fgs=C" target="_blank">190300302079465</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >105401关山光谷购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302079731" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302079731&fgs=C" target="_blank">190300302079731</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >105401关山光谷购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302079581" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302079581&fgs=C" target="_blank">190300302079581</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >105401关山光谷购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302079621" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302079621&fgs=C" target="_blank">190300302079621</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >105401关山光谷购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302079471" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302079471&fgs=C" target="_blank">190300302079471</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >105401关山光谷购物广场  </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302078601" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302078601&fgs=C" target="_blank">190300302078601</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >108501墨水湖店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077960" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077960&fgs=C" target="_blank">190300302077960</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >108501墨水湖店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302075951" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302075951&fgs=C" target="_blank">190300302075951</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >113201秦园路店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302078717" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302078717&fgs=C" target="_blank">190300302078717</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >117901江夏中百广场店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302078050" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302078050&fgs=C" target="_blank">190300302078050</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >117901江夏中百广场店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302078609" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302078609&fgs=C" target="_blank">190300302078609</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >119201五龙路店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077965" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077965&fgs=C" target="_blank">190300302077965</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >119201五龙路店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077387" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077387&fgs=C" target="_blank">190300302077387</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >119301静安上城店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077257" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077257&fgs=C" target="_blank">190300302077257</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >119301静安上城店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302076495" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302076495&fgs=C" target="_blank">190300302076495</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >119301静安上城店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077480" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077480&fgs=C" target="_blank">190300302077480</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >120301越秀星汇维港店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077166" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077166&fgs=C" target="_blank">190300302077166</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >120301越秀星汇维港店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077851" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077851&fgs=C" target="_blank">190300302077851</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >120401新唐万科店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302078234" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302078234&fgs=C" target="_blank">190300302078234</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >120401新唐万科店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                        <tr>
+                            <td><input type="checkbox" id="seqno" name="seqno" value="190300302077263" /></td>
+                            <td id="isdy" >已查看</td>
+                            <td><a href="/djcx/DdDetailAction.do?seqno=190300302077263&fgs=C" target="_blank">190300302077263</a></td>
+                            <td  >门店直供订单</td>
+                            <td  >2019-03-15</td>
+                            <td >2019-03-20</td>                                                                   
+                            <td >经销</td>                    
+                            <td >120601东方雅园店 </td>     
+                            <td > </td>        
+                            <td ></td>
+                            <td >未收货</td>       
+                        </tr>
+                        
+                    </tbody>
+
+                    
+                </table>
+            </div>
+
+        </form>
+    </body>
+</html>
